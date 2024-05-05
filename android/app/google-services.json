@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "619992692720",
+    "project_id": "study-minder",
+    "storage_bucket": "study-minder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619992692720:android:b86d5491e18695d7df4f35",
+        "android_client_info": {
+          "package_name": "com.example.study_minder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDipSKqjcM4WDpPWrbhUiykVnU48APJzzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
