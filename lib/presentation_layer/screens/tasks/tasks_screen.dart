@@ -1,9 +1,12 @@
+import 'dart:math';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:study_minder/application_layer/App_colors.dart';
+import 'package:study_minder/application_layer/alarm/alarm_service.dart';
 import 'package:study_minder/application_layer/app_images.dart';
 import 'package:study_minder/application_layer/my_icons.dart';
 import 'package:study_minder/presentation_layer/widgets/default_button.dart';
@@ -21,6 +24,18 @@ class TasksScreen extends StatelessWidget {
   final TextEditingController taskDetailsController = TextEditingController();
   final TextEditingController taskDeadLineController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  final List<String> encourageMessages=[
+    "Well done! Another task completed, another step closer to your goals!",
+        "Congratulations! You did it! Keep up the great work!",
+        "Awesome job! Your hard work paid off!",
+    "Way to go! You're making progress one task at a time!",
+        "Fantastic! You tackled that task like a champ!",
+        "Bravo! Your determination shines through with each completed task!",
+        "Great job! Take a moment to celebrate your achievement!",
+        "Excellent work! You're unstoppable when you put your mind to it!",
+        "Amazing effort! Your persistence is truly inspiring!",
+        "Outstanding! Keep up the momentum and keep achieving!",
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -190,10 +205,21 @@ class TasksScreen extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () async {
+                      Random random = Random();
                      await cubit.completeTask(model.taskUId, model.isCompleted!);
-                     !model.isCompleted!
-                         ? AppFunctions.progressAddCompleted(model.deadline!, 'taskProgress')
-                         : AppFunctions.progressRemoveCompleted(model.deadline!, 'taskProgress');
+                     if(!model.isCompleted!)
+                          {
+                            await AlarmService.scheduleAlarm(
+                              model.taskName!,
+                              encourageMessages[random.nextInt(encourageMessages.length)],
+                              tz.TZDateTime.now(tz.local).add(Duration(hours: 1)),
+                              generateFourDigitId(),
+                            );
+                       AppFunctions.progressAddCompleted(model.deadline!, 'taskProgress');
+                          }else{
+                       AppFunctions.progressRemoveCompleted(model.deadline!, 'taskProgress');
+                     }
+
                     },
                     icon: Icon(
                       Icons.check_circle,
@@ -266,6 +292,18 @@ class TasksScreen extends StatelessWidget {
     );
   }
 
+
+  int generateFourDigitId() {
+    Random random = Random();
+    int id = 0;
+
+    for (int i = 0; i < 4; i++) {
+      id = id * 10 + random.nextInt(10);
+    }
+
+    return id;
+  }
+
   Widget saveButton(context, TaskScreenCubit cubit, state) {
     return Padding(
       padding: EdgeInsets.only(left: 160.w),
@@ -277,7 +315,13 @@ class TasksScreen extends StatelessWidget {
                     taskName: taskNameController.text,
                     taskDetails: taskDetailsController.text,
                     deadline: taskDeadLineController.text)
-                .then((value) {
+                .then((value) async {
+                  await AlarmService.scheduleAlarm(
+                      taskNameController.text,
+                      taskDetailsController.text,
+                    AlarmService.convertStringToTZDateTime('${taskDeadLineController.text} 22:00'),
+                      generateFourDigitId(),
+                  );
               taskNameController.text = '';
               taskDeadLineController.text = '';
               taskDetailsController.text = '';
